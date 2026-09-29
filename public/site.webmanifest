@@ -1,0 +1,15 @@
+{
+  "name": "SketchMaker",
+  "short_name": "SketchMaker",
+  "description": "Editor de circuitos para protótipos com ESP32 e Arduino.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6965db",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

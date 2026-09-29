@@ -46,7 +46,7 @@ export function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <div className="brand">SketchMaker</div>
+      <h1 className="brand">SketchMaker</h1>
 
       <button className="primary-btn" onClick={() => set({ editor: { mode: 'new' } })}>
         <Plus size={16} /> Novo componente

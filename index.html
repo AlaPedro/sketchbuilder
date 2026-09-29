@@ -3,14 +3,96 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SketchMaker</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect x=%277%27 y=%279%27 width=%2718%27 height=%2714%27 rx=%273%27 fill=%27white%27 stroke=%27%231e1e1e%27 stroke-width=%272.5%27/%3E%3Cpath d=%27M12 9V4M20 9V4M12 23v5M20 23v5%27 stroke=%27%23e03131%27 stroke-width=%272.5%27/%3E%3C/svg%3E" />
+    <title>SketchMaker — Desenhe circuitos para ESP32 e Arduino</title>
+    <meta
+      name="description"
+      content="Editor gratuito de circuitos para protótipos com ESP32 e Arduino. Desenhe componentes, ligue pinos, corte e una fios, e peça ajuda à IA para montar o circuito."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#6965db" />
+    <link rel="canonical" href="%SITE_URL%/" />
+
+    <!-- Ícones -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph (WhatsApp, Facebook, LinkedIn, Discord) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SketchMaker" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:title" content="SketchMaker — Desenhe circuitos para ESP32 e Arduino" />
+    <meta
+      property="og:description"
+      content="Rabisque circuitos como no papel: componentes com pinos nomeados, fios pino a pino, tesoura e junções. E peça para a IA montar o circuito."
+    />
+    <meta property="og:image" content="%SITE_URL%/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Esquema de um ESP32 ligado a um resistor, LED e sensor DHT22 no SketchMaker" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SketchMaker — Desenhe circuitos para ESP32 e Arduino" />
+    <meta
+      name="twitter:description"
+      content="Editor gratuito de circuitos para protótipos maker, com ajuda de IA."
+    />
+    <meta name="twitter:image" content="%SITE_URL%/og-image.png" />
+
+    <!-- Dados estruturados -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "SketchMaker",
+        "url": "%SITE_URL%/",
+        "description": "Editor gratuito de circuitos para protótipos com ESP32 e Arduino, com componentes de pinos nomeados, fios, tesoura, junções e integração com IA.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Qualquer (navegador)",
+        "browserRequirements": "Requer JavaScript",
+        "inLanguage": "pt-BR",
+        "isAccessibleForFree": true,
+        "image": "%SITE_URL%/og-image.png",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" },
+        "featureList": [
+          "Componentes personalizados com pinos nomeados",
+          "Biblioteca com ESP32 DevKit, resistor, LED, bateria 18650 e TP4056",
+          "Ligação de fios pino a pino, corte e junções",
+          "Exportação em PNG e JSON",
+          "Formato de circuito pensado para IA"
+        ]
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet" crossorigin="anonymous" />
+    <style>
+      .seo-fallback { max-width: 640px; margin: 64px auto; padding: 0 16px; font: 16px/1.55 system-ui, sans-serif; color: #1e1e1e; }
+      .seo-fallback h1 { font: 44px 'Patrick Hand', cursive; margin: 0 0 12px; }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Conteúdo lido por buscadores e exibido enquanto o app carrega; o React substitui ao montar. -->
+    <div id="root">
+      <main class="seo-fallback">
+        <h1>SketchMaker</h1>
+        <p>
+          Editor gratuito de circuitos para protótipos com <strong>ESP32</strong> e <strong>Arduino</strong>.
+          Desenhe como no papel: cada componente é um retângulo com pinos nomeados (3V3, GND, D18...) e os fios
+          ligam pino a pino.
+        </p>
+        <ul>
+          <li>Crie componentes à mão ou use a biblioteca: ESP32 DevKit, resistor, LED, bateria 18650, TP4056, sensores.</li>
+          <li>Ligue pinos arrastando, corte fios com a tesoura e crie junções e dobras.</li>
+          <li>Copie o circuito para a IA (Claude, ChatGPT) e cole a resposta para importar o esquema pronto.</li>
+          <li>Exporte em PNG ou JSON. Tudo fica salvo no seu navegador.</li>
+        </ul>
+        <noscript><p>O SketchMaker precisa de JavaScript ativado para funcionar.</p></noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

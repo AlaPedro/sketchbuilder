@@ -51,7 +51,8 @@ button {
 .brand {
   font-family: var(--hand);
   font-size: 26px;
-  margin-bottom: 6px;
+  font-weight: 400;
+  margin: 0 0 6px;
 }
 .sb-title {
   margin-top: 12px;
