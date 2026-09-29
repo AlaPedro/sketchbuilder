@@ -10,7 +10,7 @@ function siteUrl(mode: string) {
   const url =
     env.VITE_SITE_URL ||
     (env.VERCEL_PROJECT_PRODUCTION_URL && `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`) ||
-    'https://sketchbuilder.vercel.app';
+    'https://sketchmaker.vercel.app';
   return url.replace(/\/+$/, '');
 }
 

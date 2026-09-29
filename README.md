@@ -1,12 +1,14 @@
 # SketchMaker
 
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-6965db.svg)](LICENSE)
+
 Rabiscador de circuitos para protótipos (ESP32 & cia), feito com React Flow.
 Componentes são retângulos com pinos nomeados; os fios ligam pino a pino.
+E você pode pedir para uma IA montar o circuito para você.
 
-```bash
-npm install
-npm run dev
-```
+**Use agora: [sketchmaker.vercel.app](https://sketchmaker.vercel.app)**
+
+![SketchMaker: ESP32 ligado a resistor, LED e DHT22](public/og-image.png)
 
 ## Como usar
 
@@ -54,3 +56,25 @@ O `.json` salvo pela barra usa o mesmo formato simplificado, legível para human
 
 Especificação completa: `AI_FORMAT_SPEC` em `src/aiPrompt.ts`. O formato guarda componentes,
 posições e ligações; dobras e junções desenhadas à mão viram ligações diretas entre os pinos.
+
+## Rodando localmente
+
+Requer Node.js 20+.
+
+```bash
+npm install
+npm run dev      # servidor de desenvolvimento
+npm run build    # checa tipos e gera a versão de produção em dist/
+```
+
+Stack: React, TypeScript, Vite, [React Flow](https://reactflow.dev) e Zustand.
+O ponto de partida do código está em [CLAUDE.md](CLAUDE.md).
+
+## Contribuindo
+
+Contribuições são bem-vindas: novos componentes na biblioteca, correções e ideias.
+Veja [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Licença
+
+[MIT](LICENSE): pode usar, modificar e redistribuir, mantendo o aviso de copyright.

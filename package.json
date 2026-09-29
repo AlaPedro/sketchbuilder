@@ -2,6 +2,24 @@
   "name": "sketchmaker",
   "private": true,
   "version": "0.1.0",
+  "description": "Editor de circuitos para protótipos com ESP32 e Arduino, com ajuda de IA.",
+  "license": "MIT",
+  "homepage": "https://sketchmaker.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlaPedro/sketchbuilder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AlaPedro/sketchbuilder/issues"
+  },
+  "keywords": [
+    "esp32",
+    "arduino",
+    "circuit",
+    "schematic",
+    "react-flow",
+    "maker"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
