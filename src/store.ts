@@ -52,6 +52,7 @@ interface AppState {
   wireStyle: WireStyle;
   snap: boolean;
   editor: EditorState;
+  pasteOpen: boolean;
   net: Set<string>;
   past: Snapshot[];
   future: Snapshot[];
@@ -88,6 +89,7 @@ interface AppState {
   deleteTemplate: (id: string) => void;
 
   loadProject: (p: ProjectFile) => void;
+  importCircuit: (nodes: AppNode[], edges: WireEdgeT[], mode: 'replace' | 'add') => void;
   clearCanvas: () => void;
 }
 
@@ -165,6 +167,7 @@ export const useAppStore = create<AppState>()(
       wireStyle: 'curvy',
       snap: true,
       editor: null,
+      pasteOpen: false,
       net: new Set(),
       past: [],
       future: [],
@@ -327,7 +330,7 @@ export const useAppStore = create<AppState>()(
         get().commit();
         const nodes = get().nodes.map((n) =>
           n.id === nodeId && n.type === 'component'
-            ? { ...n, width: data.width, height: data.height, data: { label: data.label, color: data.color, pins: data.pins } }
+            ? { ...n, width: data.width, height: data.height, data: { ...n.data, label: data.label, color: data.color, pins: data.pins } }
             : n,
         );
         // Fios ligados a pinos que foram removidos são apagados.
@@ -443,6 +446,21 @@ export const useAppStore = create<AppState>()(
         const lib = [...get().library];
         for (const t of p.library ?? []) if (!lib.some((x) => x.id === t.id)) lib.push(t);
         set({ nodes: p.nodes, edges: p.edges, library: lib });
+      },
+
+      importCircuit: (nodes, edges, mode) => {
+        get().commit();
+        if (mode === 'replace') return set({ nodes, edges });
+        // Adicionar: desloca o circuito novo para a direita do que já existe.
+        const current = get().nodes;
+        const right = (n: AppNode) => n.position.x + (n.width ?? n.measured?.width ?? 0);
+        const dx = current.length ? Math.max(...current.map(right)) + 160 - Math.min(...nodes.map((n) => n.position.x)) : 0;
+        const dy = current.length ? Math.min(...current.map((n) => n.position.y)) - Math.min(...nodes.map((n) => n.position.y)) : 0;
+        const moved = nodes.map((n) => ({ ...n, position: { x: n.position.x + dx, y: n.position.y + dy }, selected: true }));
+        set({
+          nodes: [...current.map((n) => ({ ...n, selected: false })), ...moved],
+          edges: [...get().edges, ...edges],
+        });
       },
 
       clearCanvas: () => {

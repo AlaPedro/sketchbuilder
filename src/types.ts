@@ -15,6 +15,8 @@ export type ComponentData = {
   label: string;
   color: string;
   pins: PinMap;
+  /** id usado no formato simplificado (ex.: "esp", "r1"); mantido entre importações. */
+  ref?: string;
 };
 
 export type NoteData = {

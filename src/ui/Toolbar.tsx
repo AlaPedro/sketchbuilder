@@ -11,6 +11,7 @@ import {
   Redo2,
   Scissors,
   Spline,
+  StickyNote,
   Trash2,
   Undo2,
   Upload,
@@ -20,6 +21,9 @@ import { useShallow } from 'zustand/react/shallow';
 import { useAppStore, type ProjectFile } from '../store';
 import type { AppNode, Tool, WireEdgeT, WireStyle } from '../types';
 import { WIRE_COLORS } from '../utils';
+import { isSimpleCircuit, toSimple } from '../simple';
+import { parseCircuitText } from './PasteDialog';
+import { useViewCenter } from './Sidebar';
 
 function Btn(props: { title: string; active?: boolean; disabled?: boolean; onClick: () => void; children: ReactNode }) {
   return (
@@ -59,27 +63,28 @@ export function Toolbar() {
       canRedo: st.future.length > 0,
     })),
   );
-  const { set, undo, redo, recolorSelected, clearCanvas, loadProject } = useAppStore.getState();
+  const { set, undo, redo, recolorSelected, clearCanvas, loadProject, importCircuit, addNote } = useAppStore.getState();
+  const viewCenter = useViewCenter();
 
+  // Arquivo salvo no formato simplificado (o mesmo que a IA lê e escreve).
   const exportJson = () => {
     const { nodes, edges, library } = useAppStore.getState();
-    const data: ProjectFile = {
-      app: 'sketchmaker',
-      version: 1,
-      nodes: nodes.map((n) => ({ ...n, selected: false })),
-      edges: edges.map((e) => ({ ...e, selected: false })),
-      library,
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(toSimple(nodes, edges, library), null, 2)], { type: 'application/json' });
     download(URL.createObjectURL(blob), `circuito-${stamp()}.json`);
   };
 
   const importJson = async (file: File) => {
     try {
-      const data = JSON.parse(await file.text()) as ProjectFile;
-      if (!Array.isArray(data.nodes) || !Array.isArray(data.edges)) throw new Error('formato inválido');
-      loadProject(data);
-      setTimeout(() => rf.fitView({ padding: 0.2 }), 50);
+      const text = await file.text();
+      const data = JSON.parse(text) as ProjectFile;
+      if (!isSimpleCircuit(data) && Array.isArray(data.nodes) && Array.isArray(data.edges)) {
+        loadProject(data); // arquivo completo antigo
+      } else {
+        const result = parseCircuitText(text);
+        importCircuit(result.nodes, result.edges, 'replace');
+        if (result.warnings.length) alert(`Abri o circuito com avisos:\n\n- ${result.warnings.join('\n- ')}`);
+      }
+      setTimeout(() => rf.fitView({ padding: 0.2, maxZoom: 1.2 }), 50);
     } catch (err) {
       alert(`Não consegui abrir o arquivo: ${(err as Error).message}`);
     }
@@ -127,6 +132,12 @@ export function Toolbar() {
         ))}
       </div>
       <div className="tb-sep" />
+      <div className="tb-group">
+        <Btn title="Texto: insere uma nota no centro da tela" onClick={() => addNote(viewCenter())}>
+          <StickyNote size={18} fill="var(--note-bg)" />
+        </Btn>
+      </div>
+      <div className="tb-sep" />
       <div className="tb-group swatches" title="Cor do fio (também recolore os fios selecionados)">
         {WIRE_COLORS.map((c) => (
           <button
@@ -159,10 +170,10 @@ export function Toolbar() {
       </div>
       <div className="tb-sep" />
       <div className="tb-group">
-        <Btn title="Exportar projeto (.json)" onClick={exportJson}>
+        <Btn title="Salvar circuito (.json simplificado)" onClick={exportJson}>
           <Download size={18} />
         </Btn>
-        <Btn title="Abrir projeto (.json)" onClick={() => fileInput.current?.click()}>
+        <Btn title="Abrir circuito (.json)" onClick={() => fileInput.current?.click()}>
           <Upload size={18} />
         </Btn>
         <Btn title="Exportar imagem (.png)" onClick={exportPng}>

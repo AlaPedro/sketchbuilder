@@ -5,6 +5,8 @@
   --panel: #ffffff;
   --accent: #6965db;
   --accent-soft: #e0dfff;
+  --note-bg: #fff3a3;
+  --note-edge: #e6c84f;
   --hand: 'Patrick Hand', 'Comic Sans MS', 'Segoe Print', cursive;
   --mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -464,9 +466,12 @@ kbd {
   font-family: var(--hand);
   font-size: 20px;
   line-height: 1.2;
-  padding: 2px 6px;
+  padding: 6px 10px;
   border-radius: 4px;
   min-width: 20px;
+  background: var(--note-bg);
+  border: 1px solid var(--note-edge);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.12);
 }
 .note.selected {
   outline: 1px dashed var(--accent);
@@ -481,7 +486,7 @@ kbd {
   outline: none;
   resize: both;
   min-width: 120px;
-  background: #fff;
+  background: var(--note-bg);
 }
 
 /* ---------- modal ---------- */
@@ -621,4 +626,89 @@ kbd {
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
+}
+
+/* ---------- IA ---------- */
+.ai-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  border: 1px solid #c5c3f5;
+  background: linear-gradient(135deg, #f3f2ff, #e8f4ff);
+  color: #3f3cbb;
+}
+.ai-btn:hover {
+  border-color: var(--accent);
+}
+.sb-hint-block {
+  margin-top: 0;
+  line-height: 1.35;
+}
+.primary-btn:disabled,
+.ghost-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  filter: none;
+}
+.paste-modal {
+  width: min(760px, calc(100vw - 32px));
+}
+.paste-body {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.paste-area {
+  width: 100%;
+  min-height: 280px;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+}
+.paste-area:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+.paste-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.paste-status.ok {
+  color: #2f9e44;
+}
+.paste-status.error {
+  color: #e03131;
+}
+.paste-warnings {
+  margin: 0;
+  padding: 8px 10px;
+  list-style: none;
+  background: #fff9db;
+  border: 1px solid #ffe066;
+  border-radius: 8px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow: auto;
+}
+.paste-warnings li {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.paste-warnings svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #e67700;
 }

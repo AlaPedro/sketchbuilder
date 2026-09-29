@@ -1,5 +1,8 @@
 import { useReactFlow } from '@xyflow/react';
-import { Pencil, Plus, StickyNote, X } from 'lucide-react';
+import { Check, ClipboardPaste, Pencil, Plus, Sparkles, X } from 'lucide-react';
+import { useState } from 'react';
+import { buildAiPrompt } from '../aiPrompt';
+import { toSimple } from '../simple';
 import { useAppStore } from '../store';
 import type { Template } from '../types';
 import { SIDES } from '../types';
@@ -15,10 +18,31 @@ export function useViewCenter() {
 
 const pinCount = (t: Template) => SIDES.reduce((n, s) => n + t.pins[s].length, 0);
 
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+}
+
 export function Sidebar() {
   const library = useAppStore((s) => s.library);
-  const { addFromTemplate, addNote, deleteTemplate, set } = useAppStore.getState();
+  const { addFromTemplate, deleteTemplate, set } = useAppStore.getState();
   const viewCenter = useViewCenter();
+  const [copied, setCopied] = useState(false);
+
+  const copyForAi = async () => {
+    const { nodes, edges, library: lib } = useAppStore.getState();
+    await copyText(buildAiPrompt(toSimple(nodes, edges, lib), lib));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
   return (
     <aside className="sidebar">
@@ -27,9 +51,18 @@ export function Sidebar() {
       <button className="primary-btn" onClick={() => set({ editor: { mode: 'new' } })}>
         <Plus size={16} /> Novo componente
       </button>
-      <button className="ghost-btn" onClick={() => addNote(viewCenter())}>
-        <StickyNote size={16} /> Texto
+
+      <div className="sb-title">IA</div>
+      <button className="ai-btn" onClick={copyForAi}>
+        {copied ? <Check size={16} /> : <Sparkles size={16} />}
+        {copied ? 'Copiado! Cole no chat' : 'Copiar para IA'}
       </button>
+      <button className="ghost-btn" onClick={() => set({ pasteOpen: true })}>
+        <ClipboardPaste size={16} /> Colar resposta da IA
+      </button>
+      <div className="sb-hint sb-hint-block">
+        Copia instruções, biblioteca e o circuito atual. No chat, escreva seu pedido no final.
+      </div>
 
       <div className="sb-title">Biblioteca</div>
       <div className="sb-hint">Clique ou arraste para o canvas</div>

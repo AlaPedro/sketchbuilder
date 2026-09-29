@@ -24,4 +24,33 @@ npm run dev
   `Ctrl+scroll` dá zoom.
 
 O projeto é salvo automaticamente no navegador. Use os botões da barra para
-exportar/importar `.json` e exportar `.png`.
+salvar/abrir `.json` e exportar `.png`.
+
+## Criar circuitos com IA
+
+1. **Copiar para IA** (barra lateral): copia instruções do formato, a biblioteca de
+   componentes e o circuito atual. Cole num chat (Claude, ChatGPT...) e escreva seu pedido no final.
+2. A IA explica o circuito e devolve um bloco ```json.
+3. **Colar resposta da IA**: cole a resposta inteira; o app mostra quantos componentes/fios
+   achou e avisa sobre pinos ou componentes que não existem. Depois é só importar (Ctrl+Z desfaz).
+
+O `.json` salvo pela barra usa o mesmo formato simplificado, legível para humanos e IAs:
+
+```json
+{
+  "app": "sketchmaker", "format": "simple", "version": 1,
+  "components": [
+    { "id": "esp", "template": "ESP32 DevKit" },
+    { "id": "r1", "template": "R 10k", "label": "R 220" },
+    { "id": "led", "template": "LED" }
+  ],
+  "wires": [
+    { "from": "esp.D18", "to": "r1.a", "color": "purple" },
+    { "from": "r1.b", "to": "led.+", "color": "red" },
+    { "from": "led.-", "to": "esp.GND#2", "color": "black" }
+  ]
+}
+```
+
+Especificação completa: `AI_FORMAT_SPEC` em `src/aiPrompt.ts`. O formato guarda componentes,
+posições e ligações; dobras e junções desenhadas à mão viram ligações diretas entre os pinos.

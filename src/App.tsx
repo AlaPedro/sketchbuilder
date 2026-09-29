@@ -4,6 +4,7 @@ import { Canvas } from './Canvas';
 import { useAppStore } from './store';
 import { ComponentEditor } from './ui/ComponentEditor';
 import { Inspector } from './ui/Inspector';
+import { PasteDialog } from './ui/PasteDialog';
 import { Sidebar } from './ui/Sidebar';
 import { Toolbar } from './ui/Toolbar';
 
@@ -13,7 +14,7 @@ function useShortcuts() {
       const t = e.target as HTMLElement;
       if (t.closest('input, textarea, [contenteditable=true]')) return;
       const st = useAppStore.getState();
-      if (st.editor) return;
+      if (st.editor || st.pasteOpen) return;
       const mod = e.ctrlKey || e.metaKey;
       const k = e.key.toLowerCase();
       if (mod && k === 'z' && !e.shiftKey) return e.preventDefault(), st.undo();
@@ -43,6 +44,7 @@ export default function App() {
           <Inspector />
         </main>
         <ComponentEditor />
+        <PasteDialog />
       </div>
     </ReactFlowProvider>
   );
