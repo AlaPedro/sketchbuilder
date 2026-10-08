@@ -116,6 +116,10 @@ interface AppState {
   patchComponent: (nodeId: string, data: Partial<{ label: string; color: string }>) => void;
   rotateSelected: () => void;
   duplicateSelected: () => void;
+  /** Cola nós/fios copiados (de qualquer canvas) com ids novos, centralizados em `at`. */
+  pasteItems: (nodes: AppNode[], edges: WireEdgeT[], at: XYPosition) => void;
+  toast: string | null;
+  showToast: (msg: string) => void;
   addNote: (center: XYPosition) => void;
   updateNote: (nodeId: string, text: string) => void;
 
@@ -139,6 +143,7 @@ interface AppState {
 }
 
 const HISTORY_LIMIT = 100;
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
 const newWire = (
   source: string,
@@ -453,6 +458,48 @@ export const useAppStore = create<AppState>()(
           nodes: [...nodes.map((n) => ({ ...n, selected: false })), ...clones],
           edges: [...edges.map((e) => ({ ...e, selected: false })), ...edgeClones],
         });
+      },
+
+      pasteItems: (items, wires, at) => {
+        if (!items.length) return;
+        get().commit();
+        const map = new Map<string, string>();
+        const size = (n: AppNode) => ({
+          w: n.width ?? n.measured?.width ?? 0,
+          h: n.height ?? n.measured?.height ?? 0,
+        });
+        const minX = Math.min(...items.map((n) => n.position.x));
+        const minY = Math.min(...items.map((n) => n.position.y));
+        const maxX = Math.max(...items.map((n) => n.position.x + size(n).w));
+        const maxY = Math.max(...items.map((n) => n.position.y + size(n).h));
+        // Desloca o grupo inteiro (múltiplo de 10 para continuar alinhado à grade).
+        const dx = Math.round((at.x - (minX + maxX) / 2) / 10) * 10;
+        const dy = Math.round((at.y - (minY + maxY) / 2) / 10) * 10;
+        const clones = items.map((n) => {
+          const id = uid(n.type === 'point' ? 'pt_' : n.type === 'note' ? 'n_' : 'c_');
+          map.set(n.id, id);
+          return {
+            ...structuredClone(n),
+            id,
+            position: { x: n.position.x + dx, y: n.position.y + dy },
+            selected: true,
+            dragging: false,
+          } as AppNode;
+        });
+        const edgeClones = wires
+          .filter((e) => map.has(e.source) && map.has(e.target))
+          .map((e) => ({ ...structuredClone(e), id: uid('w_'), source: map.get(e.source)!, target: map.get(e.target)!, selected: false }));
+        set({
+          nodes: [...get().nodes.map((n) => ({ ...n, selected: false })), ...clones],
+          edges: [...get().edges.map((e) => ({ ...e, selected: false })), ...edgeClones],
+        });
+      },
+
+      toast: null,
+      showToast: (msg) => {
+        set({ toast: msg });
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => set({ toast: null }), 1800);
       },
 
       addNote: (center) => {

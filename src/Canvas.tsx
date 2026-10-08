@@ -21,6 +21,7 @@ import { WireEdge } from './edges/WireEdge';
 import { ComponentNode } from './nodes/ComponentNode';
 import { NoteNode } from './nodes/NoteNode';
 import { PointNode } from './nodes/PointNode';
+import { useCanvasClipboard } from './clipboard';
 import { useAppStore } from './store';
 import type { AppNode, WireEdgeT } from './types';
 import { computeNet } from './utils';
@@ -34,6 +35,7 @@ const clientPoint = (e: MouseEvent | TouchEvent | ReactMouseEvent) =>
 
 export function Canvas() {
   const rf = useReactFlow<AppNode, WireEdgeT>();
+  useCanvasClipboard();
   const flowStore = useStoreApi<AppNode, WireEdgeT>();
   const { nodes, edges, onNodesChange, onEdgesChange, tool, snap, wireColor } = useAppStore(
     useShallow((s) => ({

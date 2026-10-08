@@ -128,6 +128,7 @@ function Help() {
         <li><b>Arrastar ponta solta</b> sobre um pino: une</li>
         <li><b>Duplo clique no fio</b>: cria dobra/junção</li>
         <li><kbd>C</kbd> tesoura · <kbd>J</kbd> junção · <kbd>V</kbd> selecionar</li>
+        <li><kbd>Ctrl+C</kbd> / <kbd>Ctrl+X</kbd> / <kbd>Ctrl+V</kbd> copiar, recortar, colar (também entre canvas)</li>
         <li><kbd>R</kbd> girar · <kbd>Ctrl+D</kbd> duplicar · <kbd>Del</kbd> apagar</li>
         <li><kbd>Alt+N</kbd> novo canvas · <kbd>Alt+↑/↓</kbd> trocar de canvas</li>
         <li><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd> desfazer / refazer</li>

@@ -1,6 +1,7 @@
 import { ReactFlowProvider } from '@xyflow/react';
 import { useEffect } from 'react';
 import { Canvas } from './Canvas';
+import { Toast } from './clipboard';
 import { useAppStore } from './store';
 import { CanvasTitle } from './ui/CanvasList';
 import { ComponentEditor } from './ui/ComponentEditor';
@@ -44,6 +45,7 @@ export default function App() {
           <CanvasTitle />
           <Toolbar />
           <Inspector />
+          <Toast />
         </main>
         <ComponentEditor />
         <PasteDialog />
