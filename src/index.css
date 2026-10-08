@@ -723,3 +723,185 @@ kbd {
   margin-top: 1px;
   color: #e67700;
 }
+
+/* ---------- canvas (vários desenhos) ---------- */
+.cv-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.cv-head .cv-add {
+  opacity: 1;
+  color: var(--accent);
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 6px;
+  padding: 3px;
+}
+.cv-head .cv-add:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.cv-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--muted);
+}
+.cv-search input {
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: 13px;
+  width: 100%;
+  background: none;
+}
+.cv-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 290px;
+  overflow-y: auto;
+}
+.cv-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.cv-item:hover {
+  border-color: var(--cv);
+}
+.cv-item.active {
+  border-color: var(--cv);
+  background: color-mix(in srgb, var(--cv) 8%, #fff);
+  box-shadow: 0 0 0 1px var(--cv);
+}
+.cv-item.drop-before {
+  box-shadow: 0 -2px 0 0 var(--accent);
+}
+.cv-item.drop-after {
+  box-shadow: 0 2px 0 0 var(--accent);
+}
+.cv-color {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  border: none;
+  padding: 0;
+  border-radius: 7px 0 0 7px;
+  background: var(--cv);
+  cursor: pointer;
+}
+.cv-color:hover {
+  width: 9px;
+}
+.cv-thumb {
+  width: 46px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 5px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+.cv-thumb.empty {
+  background: repeating-linear-gradient(45deg, #f8f9fa, #f8f9fa 4px, #f1f3f5 4px, #f1f3f5 8px);
+}
+.cv-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.cv-name {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cv-item.active .cv-name {
+  font-weight: 600;
+}
+.cv-meta {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.cv-rename {
+  font: inherit;
+  font-size: 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 1px 4px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  outline: none;
+}
+.cv-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.cv-item:hover .icon-btn {
+  opacity: 1;
+}
+.cv-none {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px;
+}
+
+.canvas-title {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+  padding: 6px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--cv);
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+.canvas-title-name {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--hand);
+  font-size: 19px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+@media (max-width: 1250px) {
+  .canvas-title {
+    display: none;
+  }
+}

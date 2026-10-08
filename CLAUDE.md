@@ -21,5 +21,6 @@ só-entrada 34/35/36/39 e pinos de boot do ESP32).
 
 - `src/store.ts`: estado, histórico (undo/redo) e operações de fio (cortar, unir, junção).
 - `src/Canvas.tsx`: interações do React Flow.
+- Vários canvas (`canvases` + `activeId` no store; o ativo fica em `nodes`/`edges`). UI em `src/ui/CanvasList.tsx`.
 - Salvamento automático no `localStorage` (`sketchmaker-v1`), em formato completo.
 - `npm run dev` para rodar, `npx tsc -p tsconfig.json` para checar tipos.

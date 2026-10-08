@@ -11,6 +11,7 @@ import { persist } from 'zustand/middleware';
 import { BUILTIN_TEMPLATES } from './templates';
 import type {
   AppNode,
+  CanvasDoc,
   ComponentNodeT,
   EditorState,
   PinMap,
@@ -43,9 +44,43 @@ export interface ProjectFile {
   library?: Template[];
 }
 
+type Viewport = NonNullable<CanvasDoc['viewport']>;
+
+export const CANVAS_COLORS = ['#6965db', '#e03131', '#2f9e44', '#1971c2', '#f08c00', '#9c36b5', '#0c8599', '#8b5a2b'];
+
+const newCanvas = (name: string, nodes: AppNode[] = [], edges: WireEdgeT[] = [], color?: string): CanvasDoc => {
+  const now = Date.now();
+  return {
+    id: uid('cv_'),
+    name,
+    color: color ?? CANVAS_COLORS[Math.floor(Math.random() * CANVAS_COLORS.length)],
+    nodes,
+    edges,
+    createdAt: now,
+    updatedAt: now,
+  };
+};
+
+/** Nome livre no estilo "Canvas 3" / "Cópia de X (2)". */
+function freeName(base: string, docs: CanvasDoc[], numberFirst = false) {
+  const taken = new Set(docs.map((d) => d.name.trim().toLowerCase()));
+  if (!numberFirst && !taken.has(base.toLowerCase())) return base;
+  for (let i = numberFirst ? docs.length + 1 : 2; ; i++) {
+    const n = numberFirst ? `${base} ${i}` : `${base} (${i})`;
+    if (!taken.has(n.toLowerCase())) return n;
+  }
+}
+
+/** Histórico de desfazer de cada canvas que não está ativo (só em memória). */
+const histories = new Map<string, { past: Snapshot[]; future: Snapshot[] }>();
+
+const firstCanvas = newCanvas('Meu circuito', [], [], CANVAS_COLORS[0]);
+
 interface AppState {
   nodes: AppNode[];
   edges: WireEdgeT[];
+  canvases: CanvasDoc[];
+  activeId: string;
   library: Template[];
   tool: Tool;
   wireColor: string;
@@ -91,6 +126,16 @@ interface AppState {
   loadProject: (p: ProjectFile) => void;
   importCircuit: (nodes: AppNode[], edges: WireEdgeT[], mode: 'replace' | 'add') => void;
   clearCanvas: () => void;
+
+  /** Lista de canvas com o ativo atualizado a partir de `nodes`/`edges`. */
+  syncedCanvases: (viewport?: Viewport) => CanvasDoc[];
+  switchCanvas: (id: string, viewport?: Viewport) => void;
+  createCanvas: (opts?: { name?: string; viewport?: Viewport; nodes?: AppNode[]; edges?: WireEdgeT[] }) => string;
+  duplicateCanvas: (id: string, viewport?: Viewport) => void;
+  renameCanvas: (id: string, name: string) => void;
+  recolorCanvas: (id: string, color: string) => void;
+  deleteCanvas: (id: string) => void;
+  moveCanvas: (id: string, toIndex: number) => void;
 }
 
 const HISTORY_LIMIT = 100;
@@ -161,6 +206,8 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       nodes: [],
       edges: [],
+      canvases: [firstCanvas],
+      activeId: firstCanvas.id,
       library: BUILTIN_TEMPLATES,
       tool: 'select',
       wireColor: '#e03131',
@@ -177,8 +224,12 @@ export const useAppStore = create<AppState>()(
       set: (partial) => set(partial),
 
       commit: () => {
-        const { nodes, edges, past } = get();
-        set({ past: [...past.slice(-HISTORY_LIMIT + 1), { nodes, edges }], future: [] });
+        const { nodes, edges, past, canvases, activeId } = get();
+        set({
+          past: [...past.slice(-HISTORY_LIMIT + 1), { nodes, edges }],
+          future: [],
+          canvases: canvases.map((c) => (c.id === activeId ? { ...c, updatedAt: Date.now() } : c)),
+        });
       },
       undo: () => {
         const { past, future, nodes, edges } = get();
@@ -467,17 +518,103 @@ export const useAppStore = create<AppState>()(
         get().commit();
         set({ nodes: [], edges: [] });
       },
+
+      syncedCanvases: (viewport) => {
+        const { canvases, activeId, nodes, edges } = get();
+        return canvases.map((c) =>
+          c.id === activeId ? { ...c, nodes, edges, viewport: viewport ?? c.viewport } : c,
+        );
+      },
+
+      switchCanvas: (id, viewport) => {
+        const { activeId, past, future } = get();
+        if (id === activeId) return;
+        const canvases = get().syncedCanvases(viewport);
+        const next = canvases.find((c) => c.id === id);
+        if (!next) return;
+        histories.set(activeId, { past, future });
+        const h = histories.get(id) ?? { past: [], future: [] };
+        set({
+          canvases,
+          activeId: id,
+          nodes: next.nodes,
+          edges: next.edges,
+          past: h.past,
+          future: h.future,
+          net: new Set(),
+          editor: null,
+          tool: 'select',
+        });
+      },
+
+      createCanvas: (opts = {}) => {
+        const canvases = get().syncedCanvases(opts.viewport);
+        const name = opts.name?.trim() ? freeName(opts.name.trim(), canvases) : freeName('Canvas', canvases, true);
+        const doc = newCanvas(name, opts.nodes, opts.edges);
+        set({ canvases: [...canvases, doc] });
+        get().switchCanvas(doc.id);
+        return doc.id;
+      },
+
+      duplicateCanvas: (id, viewport) => {
+        const canvases = get().syncedCanvases(viewport);
+        const src = canvases.find((c) => c.id === id);
+        if (!src) return;
+        const copy = { ...newCanvas(freeName(`${src.name} (cópia)`, canvases), src.nodes, src.edges, src.color), viewport: src.viewport };
+        const i = canvases.indexOf(src);
+        set({ canvases: [...canvases.slice(0, i + 1), copy, ...canvases.slice(i + 1)] });
+        get().switchCanvas(copy.id);
+      },
+
+      renameCanvas: (id, name) => {
+        const clean = name.trim();
+        if (!clean) return;
+        set({ canvases: get().canvases.map((c) => (c.id === id ? { ...c, name: clean } : c)) });
+      },
+
+      recolorCanvas: (id, color) =>
+        set({ canvases: get().canvases.map((c) => (c.id === id ? { ...c, color } : c)) }),
+
+      deleteCanvas: (id) => {
+        const { canvases, activeId } = get();
+        histories.delete(id);
+        if (canvases.length === 1) {
+          // Nunca fica sem canvas: o último vira um canvas vazio.
+          const doc = newCanvas('Meu circuito', [], [], CANVAS_COLORS[0]);
+          return set({ canvases: [doc], activeId: doc.id, nodes: [], edges: [], past: [], future: [], net: new Set() });
+        }
+        const i = canvases.findIndex((c) => c.id === id);
+        if (id === activeId) get().switchCanvas(canvases[i + 1]?.id ?? canvases[i - 1].id);
+        set({ canvases: get().canvases.filter((c) => c.id !== id) });
+      },
+
+      moveCanvas: (id, toIndex) => {
+        const list = [...get().canvases];
+        const from = list.findIndex((c) => c.id === id);
+        if (from < 0) return;
+        const [doc] = list.splice(from, 1);
+        list.splice(Math.max(0, Math.min(toIndex, list.length)), 0, doc);
+        set({ canvases: list });
+      },
     }),
     {
       name: STORAGE_KEY,
       partialize: (s) => ({
-        nodes: s.nodes,
-        edges: s.edges,
+        canvases: s.syncedCanvases(),
+        activeId: s.activeId,
         library: s.library,
         wireColor: s.wireColor,
         wireStyle: s.wireStyle,
         snap: s.snap,
       }),
+      // Salvamentos antigos tinham um único canvas em `nodes`/`edges`: vira o canvas "Meu circuito".
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<AppState>;
+        let canvases = p.canvases;
+        if (!canvases?.length) canvases = [{ ...firstCanvas, nodes: p.nodes ?? [], edges: p.edges ?? [] }];
+        const active = canvases.find((c) => c.id === p.activeId) ?? canvases[0];
+        return { ...current, ...p, canvases, activeId: active.id, nodes: active.nodes, edges: active.edges };
+      },
     },
   ),
 );

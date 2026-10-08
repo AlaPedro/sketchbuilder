@@ -51,3 +51,15 @@ export type EditorState =
   | { mode: 'node'; nodeId: string }
   | { mode: 'template'; templateId: string }
   | null;
+
+/** Um desenho separado (aba). O canvas ativo vive em `nodes`/`edges` do store; aqui fica a cópia salva. */
+export interface CanvasDoc {
+  id: string;
+  name: string;
+  color: string;
+  nodes: AppNode[];
+  edges: WireEdgeT[];
+  viewport?: { x: number; y: number; zoom: number };
+  createdAt: number;
+  updatedAt: number;
+}

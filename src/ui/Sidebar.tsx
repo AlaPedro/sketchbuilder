@@ -6,6 +6,7 @@ import { toSimple } from '../simple';
 import { useAppStore } from '../store';
 import type { Template } from '../types';
 import { SIDES } from '../types';
+import { CanvasList } from './CanvasList';
 
 export function useViewCenter() {
   const rf = useReactFlow();
@@ -61,6 +62,8 @@ export function Sidebar() {
   return (
     <aside className="sidebar">
       <h1 className="brand">SketchMaker</h1>
+
+      <CanvasList />
 
       <button className="primary-btn" onClick={() => set({ editor: { mode: 'new' } })}>
         <Plus size={16} /> Novo componente

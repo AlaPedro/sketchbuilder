@@ -23,6 +23,7 @@ import type { AppNode, Tool, WireEdgeT, WireStyle } from '../types';
 import { WIRE_COLORS } from '../utils';
 import { isSimpleCircuit, toSimple } from '../simple';
 import { parseCircuitText } from './PasteDialog';
+import { useCanvasNav } from './CanvasList';
 import { useViewCenter } from './Sidebar';
 
 function Btn(props: { title: string; active?: boolean; disabled?: boolean; onClick: () => void; children: ReactNode }) {
@@ -65,22 +66,29 @@ export function Toolbar() {
   );
   const { set, undo, redo, recolorSelected, clearCanvas, loadProject, importCircuit, addNote } = useAppStore.getState();
   const viewCenter = useViewCenter();
+  const nav = useCanvasNav();
 
   // Arquivo salvo no formato simplificado (o mesmo que a IA lê e escreve).
   const exportJson = () => {
     const { nodes, edges, library } = useAppStore.getState();
     const blob = new Blob([JSON.stringify(toSimple(nodes, edges, library), null, 2)], { type: 'application/json' });
-    download(URL.createObjectURL(blob), `circuito-${stamp()}.json`);
+    download(URL.createObjectURL(blob), `${fileBase()}-${stamp()}.json`);
   };
 
   const importJson = async (file: File) => {
     try {
       const text = await file.text();
       const data = JSON.parse(text) as ProjectFile;
-      if (!isSimpleCircuit(data) && Array.isArray(data.nodes) && Array.isArray(data.edges)) {
+      const legacy = !isSimpleCircuit(data) && Array.isArray(data.nodes) && Array.isArray(data.edges);
+      const result = legacy ? null : parseCircuitText(text);
+      // Abre num canvas novo com o nome do arquivo (ou no atual, se ele estiver vazio).
+      const name = file.name.replace(/\.json$/i, '').replace(/-\d{8}-\d{4}$/, '');
+      const st = useAppStore.getState();
+      if (st.nodes.length) nav.create({ name });
+      else st.renameCanvas(st.activeId, name);
+      if (!result) {
         loadProject(data); // arquivo completo antigo
       } else {
-        const result = parseCircuitText(text);
         importCircuit(result.nodes, result.edges, 'replace');
         if (result.warnings.length) alert(`Abri o circuito com avisos:\n\n- ${result.warnings.join('\n- ')}`);
       }
@@ -119,7 +127,7 @@ export function Toolbar() {
       style: { width: `${width}px`, height: `${height}px`, transform: `translate(${pad - minX}px, ${pad - minY}px) scale(1)` },
       filter: (node) => !(node instanceof HTMLElement && node.classList.contains('react-flow__resize-control')),
     });
-    download(url, `circuito-${stamp()}.png`);
+    download(url, `${fileBase()}-${stamp()}.png`);
   };
 
   return (
@@ -173,7 +181,7 @@ export function Toolbar() {
         <Btn title="Salvar circuito (.json simplificado)" onClick={exportJson}>
           <Download size={18} />
         </Btn>
-        <Btn title="Abrir circuito (.json)" onClick={() => fileInput.current?.click()}>
+        <Btn title="Abrir circuito (.json) num canvas novo" onClick={() => fileInput.current?.click()}>
           <Upload size={18} />
         </Btn>
         <Btn title="Exportar imagem (.png)" onClick={exportPng}>
@@ -208,6 +216,13 @@ function download(url: string, name: string) {
   a.href = url;
   a.download = name;
   a.click();
+}
+
+/** Nome do canvas ativo, seguro para nome de arquivo. */
+function fileBase() {
+  const st = useAppStore.getState();
+  const name = st.canvases.find((c) => c.id === st.activeId)?.name ?? 'circuito';
+  return name.replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '-') || 'circuito';
 }
 
 function stamp() {

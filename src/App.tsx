@@ -2,6 +2,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { useEffect } from 'react';
 import { Canvas } from './Canvas';
 import { useAppStore } from './store';
+import { CanvasTitle } from './ui/CanvasList';
 import { ComponentEditor } from './ui/ComponentEditor';
 import { Inspector } from './ui/Inspector';
 import { PasteDialog } from './ui/PasteDialog';
@@ -40,6 +41,7 @@ export default function App() {
         <Sidebar />
         <main className="stage">
           <Canvas />
+          <CanvasTitle />
           <Toolbar />
           <Inspector />
         </main>
