@@ -19,7 +19,22 @@ export const WIRE_COLORS = [
   '#9c36b5', // roxo
   '#fab005', // amarelo
   '#868e96', // cinza
+  '#8b5a2b', // marrom
+  '#ffffff', // branco
+  '#e64980', // rosa
+  '#15aabf', // ciano
+  '#82c91e', // verde-limão
+  '#364fc7', // azul-escuro
 ];
+
+/** Cores claras (ex.: fio branco) precisam de contorno para aparecer no fundo branco. */
+export function isLightColor(hex: string) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return false;
+  const v = parseInt(m[1], 16);
+  const lum = 0.299 * (v >> 16) + 0.587 * ((v >> 8) & 255) + 0.114 * (v & 255);
+  return lum > 200;
+}
 
 export const COMPONENT_COLORS = [
   '#ffffff',

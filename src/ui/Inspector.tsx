@@ -1,9 +1,10 @@
 import { useReactFlow } from '@xyflow/react';
-import { BookmarkPlus, Copy, Pencil, RotateCw, Trash2 } from 'lucide-react';
+import { BookmarkPlus, Check, Copy, Pencil, RotateCw, Sparkles, Trash2 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../store';
 import { SIDES } from '../types';
 import { COMPONENT_COLORS, WIRE_COLORS } from '../utils';
+import { useCopyForAi, useSelectedItemCount } from './Sidebar';
 
 export function Inspector() {
   const rf = useReactFlow();
@@ -13,6 +14,8 @@ export function Inspector() {
     netSize: useAppStore((s) => s.net.size),
   };
   const st = useAppStore.getState();
+  const { copy, copied } = useCopyForAi();
+  const itemCount = useSelectedItemCount();
 
   const comps = sel.nodes.filter((n) => n.type === 'component');
   const points = sel.nodes.filter((n) => n.type === 'point');
@@ -92,6 +95,11 @@ export function Inspector() {
       )}
 
       <div className="ins-actions">
+        {itemCount > 1 && (
+          <button onClick={() => copy('selection')} title="Copia só os itens selecionados para colar no chat da IA">
+            {copied ? <Check size={14} /> : <Sparkles size={14} />} {copied ? 'Copiado!' : 'Copiar para IA'}
+          </button>
+        )}
         {comps.length > 0 && (
           <button onClick={st.rotateSelected} title="R">
             <RotateCw size={14} /> Girar 90°

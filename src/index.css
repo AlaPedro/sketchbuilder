@@ -227,14 +227,24 @@ button {
   cursor: default;
 }
 .swatches {
-  gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(7, 14px);
+  gap: 3px;
   padding: 0 4px;
+}
+.swatches .swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+.swatches .swatch.active {
+  outline-offset: 1px;
 }
 .swatch {
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(0, 0, 0, 0.28);
   padding: 0;
 }
 .swatch.active {

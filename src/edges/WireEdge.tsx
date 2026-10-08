@@ -11,7 +11,7 @@ import {
 import { memo } from 'react';
 import { useAppStore } from '../store';
 import type { AppNode, WireEdgeT } from '../types';
-import { inferPosition } from '../utils';
+import { inferPosition, isLightColor } from '../utils';
 
 const center = (n: InternalNode<AppNode>) => ({
   x: n.internals.positionAbsolute.x + (n.measured.width ?? 0) / 2,
@@ -45,17 +45,21 @@ function WireEdgeImpl(props: EdgeProps<WireEdgeT>) {
         : getBezierPath({ ...args, curvature: 0.35 });
 
   const color = data?.color ?? '#1e1e1e';
+  const width = selected ? 3.5 : 2.5;
 
   return (
     <>
       {(selected || inNet) && (
         <path d={path} fill="none" stroke={color} strokeOpacity={selected ? 0.28 : 0.16} strokeWidth={selected ? 11 : 9} strokeLinecap="round" />
       )}
+      {isLightColor(color) && (
+        <path d={path} fill="none" stroke="#495057" strokeWidth={width + 2} strokeLinecap="round" />
+      )}
       <BaseEdge
         id={id}
         path={path}
         interactionWidth={18}
-        style={{ stroke: color, strokeWidth: selected ? 3.5 : 2.5, strokeLinecap: 'round' }}
+        style={{ stroke: color, strokeWidth: width, strokeLinecap: 'round' }}
       />
     </>
   );

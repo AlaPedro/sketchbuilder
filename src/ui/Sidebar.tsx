@@ -31,18 +31,32 @@ async function copyText(text: string) {
   }
 }
 
+/** Componentes e notas selecionados (pontos de fio não contam). */
+export const useSelectedItemCount = () =>
+  useAppStore((s) => s.nodes.filter((n) => n.selected && n.type !== 'point').length);
+
+/**
+ * Copia o prompt para IA. `selection`: só os componentes/notas selecionados e os fios entre eles
+ * (os pontos entram todos para que fios com dobras/junções entre itens selecionados não se percam).
+ */
+export function useCopyForAi() {
+  const [copied, setCopied] = useState<'all' | 'selection' | null>(null);
+  const copy = async (scope: 'all' | 'selection') => {
+    const { nodes, edges, library } = useAppStore.getState();
+    const part = scope === 'selection' ? nodes.filter((n) => n.type === 'point' || n.selected) : nodes;
+    await copyText(buildAiPrompt(toSimple(part, edges, library), library, scope === 'selection'));
+    setCopied(scope);
+    setTimeout(() => setCopied(null), 2500);
+  };
+  return { copy, copied };
+}
+
 export function Sidebar() {
   const library = useAppStore((s) => s.library);
   const { addFromTemplate, deleteTemplate, set } = useAppStore.getState();
   const viewCenter = useViewCenter();
-  const [copied, setCopied] = useState(false);
-
-  const copyForAi = async () => {
-    const { nodes, edges, library: lib } = useAppStore.getState();
-    await copyText(buildAiPrompt(toSimple(nodes, edges, lib), lib));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
-  };
+  const { copy, copied } = useCopyForAi();
+  const selCount = useSelectedItemCount();
 
   return (
     <aside className="sidebar">
@@ -53,15 +67,31 @@ export function Sidebar() {
       </button>
 
       <div className="sb-title">IA</div>
-      <button className="ai-btn" onClick={copyForAi}>
-        {copied ? <Check size={16} /> : <Sparkles size={16} />}
-        {copied ? 'Copiado! Cole no chat' : 'Copiar para IA'}
-      </button>
+      {selCount > 0 ? (
+        <>
+          <button className="ai-btn" onClick={() => copy('selection')}>
+            {copied === 'selection' ? <Check size={16} /> : <Sparkles size={16} />}
+            {copied === 'selection' ? 'Copiado! Cole no chat' : `Copiar seleção para IA (${selCount})`}
+          </button>
+          <button className="ghost-btn" onClick={() => copy('all')}>
+            {copied === 'all' ? <Check size={16} /> : <Sparkles size={16} />}
+            {copied === 'all' ? 'Copiado! Cole no chat' : 'Copiar projeto inteiro'}
+          </button>
+        </>
+      ) : (
+        <button className="ai-btn" onClick={() => copy('all')}>
+          {copied === 'all' ? <Check size={16} /> : <Sparkles size={16} />}
+          {copied === 'all' ? 'Copiado! Cole no chat' : 'Copiar para IA'}
+        </button>
+      )}
       <button className="ghost-btn" onClick={() => set({ pasteOpen: true })}>
         <ClipboardPaste size={16} /> Colar resposta da IA
       </button>
       <div className="sb-hint sb-hint-block">
-        Copia instruções, biblioteca e o circuito atual. No chat, escreva seu pedido no final.
+        {selCount > 0
+          ? 'Copia instruções, biblioteca e só os itens selecionados (com os fios entre eles).'
+          : 'Copia instruções, biblioteca e o circuito atual. Selecione itens para copiar só uma parte.'}{' '}
+        No chat, escreva seu pedido no final.
       </div>
 
       <div className="sb-title">Biblioteca</div>

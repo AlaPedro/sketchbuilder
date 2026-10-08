@@ -45,6 +45,12 @@ const WIRE_COLOR_NAMES: Record<string, string> = {
   purple: WIRE_COLORS[5],
   yellow: WIRE_COLORS[6],
   gray: WIRE_COLORS[7],
+  brown: WIRE_COLORS[8],
+  white: WIRE_COLORS[9],
+  pink: WIRE_COLORS[10],
+  cyan: WIRE_COLORS[11],
+  lime: WIRE_COLORS[12],
+  navy: WIRE_COLORS[13],
 };
 export const WIRE_COLOR_LIST = Object.keys(WIRE_COLOR_NAMES);
 

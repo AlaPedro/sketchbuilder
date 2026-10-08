@@ -56,14 +56,24 @@ function libraryText(library: Template[]) {
     .join('\n');
 }
 
-export function buildAiPrompt(circuit: SimpleCircuit, library: Template[]) {
+/** `partial`: o circuito é só um trecho (itens selecionados) de um projeto maior. */
+export function buildAiPrompt(circuit: SimpleCircuit, library: Template[], partial = false) {
   const empty = circuit.components.length === 0;
+  const finish = partial
+    ? 'Termine com o trecho COMPLETO (todos os componentes e fios deste trecho, não só as mudanças) em um único bloco ```json no formato abaixo. Eu importo esse JSON direto no app.'
+    : 'Termine com o circuito COMPLETO (não só as mudanças) em um único bloco ```json no formato abaixo. Eu importo esse JSON direto no app.';
+  const current = partial
+    ? `## Trecho selecionado do circuito
+Isto é só uma parte de um projeto maior (os itens que selecionei). Fios que ligam este trecho a componentes fora da seleção não aparecem aqui.
+${empty ? '(nenhum componente no trecho)' : '```json\n' + JSON.stringify(circuit, null, 2) + '\n```'}`
+    : `## Circuito atual
+${empty ? '(vazio — crie do zero)' : '```json\n' + JSON.stringify(circuit, null, 2) + '\n```'}`;
   return `Você vai me ajudar a montar e entender circuitos eletrônicos para protótipos (ESP32, Arduino, sensores, módulos) usando o SketchMaker, um editor de esquemas onde cada componente é um retângulo com pinos nomeados e os fios ligam pino a pino.
 
 Como responder:
 1. Explique o circuito de forma curta e didática (o que cada ligação faz e por quê).
 2. Aponte riscos: tensão errada (ex.: 5V em pino de 3.3V), curto, falta de resistor, pino de boot/entrada-apenas do ESP32, corrente demais num GPIO.
-3. Termine com o circuito COMPLETO (não só as mudanças) em um único bloco \`\`\`json no formato abaixo. Eu importo esse JSON direto no app.
+3. ${finish}
 
 ${AI_FORMAT_SPEC}
 
@@ -72,8 +82,7 @@ ${libraryText(library)}
 
 Se precisar de algo que não está na biblioteca, crie com "pins" usando os nomes de pino reais do módulo.
 
-## Circuito atual
-${empty ? '(vazio — crie do zero)' : '```json\n' + JSON.stringify(circuit, null, 2) + '\n```'}
+${current}
 
 ## Meu pedido
 `;
